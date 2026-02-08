@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        body { background: #000; color: #fff; display: flex; height: 100vh; justify-content: center; align-items: center; font-family: sans-serif; }
+        .box { background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🚀 Bot Deployer</h2>
+        <p>Login to manage your bots</p>
+        
+        <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                data-telegram-login="SudeepDeployBot" 
+                data-size="large" 
+                data-radius="10" 
+                data-onauth="onTelegramAuth(user)" 
+                data-request-access="write"></script>
+    </div>
+
+    <script>
+        async function onTelegramAuth(user) {
+            const res = await fetch('/auth/telegram', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(user)
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                window.location.href = '/dashboard';
+            } else {
+                alert(data.message);
+                if(data.redirect) window.location.href = data.redirect;
+            }
+        }
+    </script>
+</body>
+</html>
