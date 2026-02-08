@@ -3,66 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 250px; background: #0a0a0a; border-right: 1px solid #222; height: 100vh; padding: 20px; }
-        .content { flex: 1; padding: 30px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        :root {
+            --bg: #050505;
+            --sidebar: #0f0f11;
+            --card: #151518;
+            --accent: #7928ca;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --border: #222;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--sidebar); border-right: 1px solid var(--border); padding: 25px; display: flex; flex-direction: column; }
+        .logo { font-size: 20px; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        .logo i { color: var(--accent); }
         
-        .card { background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; margin-bottom: 20px; width: 300px; display: inline-block; margin-right: 20px; vertical-align: top; }
-        .card img { width: 100%; height: 150px; object-fit: cover; }
-        .card-body { padding: 15px; }
-        
-        .btn { display: block; width: 100%; padding: 10px; margin-top: 10px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
-        .btn-green { background: #238636; color: white; }
-        .btn-help { background: transparent; border: 1px solid #555; color: #aaa; }
-        
-        /* POPUP */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
-        .modal-content { background: #161b22; padding: 20px; border-radius: 10px; width: 400px; max-height: 80vh; overflow-y: auto; }
+        .user-info { display: flex; align-items: center; gap: 12px; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 12px; margin-bottom: 30px; }
+        .user-info img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent); }
+        .user-details div:first-child { font-weight: 600; font-size: 14px; }
+        .user-details div:last-child { color: var(--text-muted); font-size: 12px; }
+
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: var(--text-muted); text-decoration: none; border-radius: 10px; transition: 0.2s; margin-bottom: 5px; font-size: 14px; font-weight: 500; }
+        .menu-item:hover, .menu-item.active { background: var(--accent); color: white; }
+        .menu-item.logout { margin-top: auto; color: #ff4444; }
+        .menu-item.logout:hover { background: rgba(255, 68, 68, 0.1); }
+
+        /* MAIN CONTENT */
+        .content { flex: 1; padding: 40px; overflow-y: auto; }
+        h1 { font-size: 24px; margin-bottom: 30px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; }
+
+        /* SERVICE CARD */
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .card-img { width: 100%; height: 160px; object-fit: cover; opacity: 0.8; }
+        .card-body { padding: 20px; }
+        .card h3 { margin: 0 0 10px 0; font-size: 18px; }
+        .card p { color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-bottom: 20px; }
+
+        .actions { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
+        .btn-primary { background: white; color: black; }
+        .btn-primary:hover { background: #eee; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: white; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+        /* ACTIVE BOTS LIST */
+        .bot-row { display: flex; align-items: center; justify-content: space-between; background: var(--card); padding: 15px 20px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .status-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; display: inline-block; margin-right: 8px; }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; align-items: center; justify-content: center; }
+        .modal-content { background: #161b22; width: 500px; max-height: 85vh; overflow-y: auto; padding: 30px; border-radius: 16px; border: 1px solid var(--border); position: relative; }
+        .close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <h3>👋 {{ user.name }}</h3>
-        <p>@{{ user.username }}</p>
-        <hr style="border-color: #333;">
-        <p>🚀 Dashboard</p>
-        <p>📦 My Bots</p>
-        <a href="/logout" style="color: red;">Logout</a>
+        <div class="logo"><i class="fas fa-rocket"></i> Deployer</div>
+        
+        <div class="user-info">
+            <img src="{{ user.photo }}" alt="User">
+            <div class="user-details">
+                <div>{{ user.name }}</div>
+                <div>@{{ user.username }}</div>
+            </div>
+        </div>
+
+        <a href="#" class="menu-item active"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="#" class="menu-item"><i class="fas fa-robot"></i> My Bots</a>
+        <a href="#" class="menu-item"><i class="fas fa-cog"></i> Settings</a>
+        <a href="/logout" class="menu-item logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
 
     <div class="content">
-        <h1>Available Services</h1>
+        <h1>🚀 Available Services</h1>
         
-        {% for service in services %}
-        <div class="card">
-            <img src="{{ service.thumbnail }}">
-            <div class="card-body">
-                <h3>{{ service.name }}</h3>
-                <p style="color: #888; font-size: 13px;">{{ service.desc }}</p>
-                
-                <a href="/prepare" class="btn btn-green" style="text-decoration: none; text-align: center;">⚡ Get Started</a>
-                
-                <button onclick='openHelp({{ service.tutorial | tojson }})' class="btn btn-help">❓ Need Help</button>
+        <div class="grid">
+            {% for service in services %}
+            <div class="card">
+                <img src="{{ service.thumbnail }}" class="card-img">
+                <div class="card-body">
+                    <h3>{{ service.name }}</h3>
+                    <p>{{ service.description }}</p>
+                    <div class="actions">
+                        <a href="/prepare/music" class="btn btn-primary"><i class="fas fa-bolt"></i> Deploy</a>
+                        <button onclick='openHelp({{ service.tutorial | tojson }})' class="btn btn-secondary"><i class="far fa-question-circle"></i> Guide</button>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
 
-        <h1>📦 My Active Bots</h1>
-        {% for bot in my_bots %}
-            <div style="background: #111; padding: 10px; border: 1px solid #333; margin-bottom: 5px; display: flex; justify-content: space-between;">
-                <span>{{ bot.name }}</span>
-                <a href="{{ bot.app_url }}" target="_blank" style="color: #58a6ff;">Open Bot</a>
+        <h1 style="margin-top: 50px;">📦 Active Deployments</h1>
+        {% if my_bots %}
+            {% for bot in my_bots %}
+            <div class="bot-row">
+                <div style="display: flex; align-items: center;">
+                    <div class="status-dot"></div>
+                    <span style="font-weight: 600;">{{ bot.name }}</span>
+                </div>
+                <div class="actions" style="width: auto;">
+                    <a href="{{ bot.app_url }}" target="_blank" class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;">Open</a>
+                    <a href="{{ bot.dash_url }}" target="_blank" class="btn btn-secondary" style="padding: 5px 15px; font-size: 12px;">Logs</a>
+                </div>
             </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <p style="color: #666;">No bots deployed yet.</p>
+        {% endif %}
     </div>
 
     <div id="helpModal" class="modal">
         <div class="modal-content">
-            <h2 style="color: #238636;">📝 Setup Steps</h2>
-            <div id="stepsContainer"></div>
-            <button onclick="document.getElementById('helpModal').style.display='none'" class="btn btn-help">Close</button>
+            <button onclick="closeHelp()" class="close-btn">&times;</button>
+            <h2 style="margin-top: 0; color: #fff;">📝 Setup Guide</h2>
+            <div id="stepsContainer" style="margin-top: 20px;"></div>
         </div>
     </div>
 
@@ -71,14 +135,24 @@
             const container = document.getElementById('stepsContainer');
             container.innerHTML = "";
             if(!steps || steps.length === 0) {
-                container.innerHTML = "<p>No tutorial added.</p>";
+                container.innerHTML = "<p style='color:#888'>No guide available for this service.</p>";
             } else {
                 steps.forEach((step, i) => {
-                    container.innerHTML += `<p><b>Step ${i+1}:</b> ${step.text}</p>`;
-                    if(step.img) container.innerHTML += `<img src="${step.img}" style="width:100%; border-radius:5px; margin-bottom:15px;">`;
+                    const imgHTML = step.img ? `<img src="${step.img}" style="width:100%; border-radius:8px; margin-top:10px; border:1px solid #333;">` : '';
+                    container.innerHTML += `
+                        <div style="margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                            <div style="color: #7928ca; font-weight: bold; font-size: 12px; margin-bottom: 5px;">STEP ${i+1}</div>
+                            <div style="color: #ddd; line-height: 1.4;">${step.text}</div>
+                            ${imgHTML}
+                        </div>
+                    `;
                 });
             }
             document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function closeHelp() {
+            document.getElementById('helpModal').style.display = 'none';
         }
     </script>
 </body>
