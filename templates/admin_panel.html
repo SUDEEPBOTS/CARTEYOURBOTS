@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <style>
+        body { background: #0d1117; color: #fff; font-family: sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 5px; }
+        label { color: #58a6ff; font-weight: bold; display: block; margin-top: 10px; }
+        
+        .step-card { background: #21262d; padding: 15px; margin-bottom: 10px; border: 1px solid #30363d; border-radius: 8px; }
+        .btn { padding: 10px 20px; cursor: pointer; border-radius: 5px; border: none; font-weight: bold; }
+        .btn-save { background: #238636; color: white; width: 100%; margin-top: 20px; }
+        .btn-add { background: #1f6feb; color: white; }
+        .btn-del { background: #da3633; color: white; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⚙️ Manage Services</h1>
+    
+    <div style="background: #161b22; padding: 20px; border-radius: 10px; border: 1px solid #30363d;">
+        <h2>Edit: Yukki Music Bot</h2>
+        
+        <label>Service Thumbnail URL</label>
+        <input type="text" id="thumbnail" placeholder="https://imgur.com/..." value="https://te.legra.ph/file/7e56d987541747806140c.jpg">
+
+        <label>Description</label>
+        <textarea id="description" rows="2">High quality music bot with dashboard support.</textarea>
+        
+        <label>Repo URL</label>
+        <input type="text" id="repo" value="https://github.com/TeamYukki/YukkiMusicBot">
+
+        <hr style="border-color: #30363d;">
+        
+        <h3>📖 Tutorial Steps (Need Help)</h3>
+        <div id="stepsContainer"></div>
+        
+        <button onclick="addStep()" class="btn btn-add">+ Add Step</button>
+        <button onclick="saveService()" class="btn btn-save">💾 Save Changes</button>
+    </div>
+</div>
+
+<script>
+    // Step Add karne ka logic
+    function addStep(imgVal="", textVal="") {
+        const div = document.createElement('div');
+        div.className = 'step-card';
+        div.innerHTML = `
+            <button onclick="this.parentElement.remove()" class="btn btn-del">X</button>
+            <label>Screenshot URL</label>
+            <input type="text" class="step-img" value="${imgVal}" placeholder="Image Link">
+            <label>Instruction Text</label>
+            <input type="text" class="step-text" value="${textVal}" placeholder="e.g. Click on Deploy">
+        `;
+        document.getElementById('stepsContainer').appendChild(div);
+    }
+
+    async function saveService() {
+        // Data Collect karo
+        const steps = [];
+        document.querySelectorAll('.step-card').forEach(card => {
+            steps.push({
+                img: card.querySelector('.step-img').value,
+                text: card.querySelector('.step-text').value
+            });
+        });
+
+        const payload = {
+            thumbnail: document.getElementById('thumbnail').value,
+            description: document.getElementById('description').value,
+            repo_url: document.getElementById('repo').value,
+            tutorial: steps
+        };
+
+        const res = await fetch('/admin/update_service', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await res.json();
+        alert(data.message);
+    }
+</script>
+
+</body>
+</html>
