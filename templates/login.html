@@ -2,40 +2,117 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Deployer Access</title>
     <style>
-        body { background: #000; color: #fff; display: flex; height: 100vh; justify-content: center; align-items: center; font-family: sans-serif; }
-        .box { background: #111; padding: 40px; border-radius: 10px; border: 1px solid #333; text-align: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        body {
+            background-color: #000;
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px 40px;
+            border-radius: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 100%;
+            max-width: 350px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .glow-circle {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: #7928ca;
+            filter: blur(90px);
+            border-radius: 50%;
+            z-index: -1;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.6;
+        }
+
+        h1 { margin: 0 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+        p { color: #888; margin: 0 0 30px 0; font-size: 14px; }
+        
+        .status-badge {
+            background: rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        /* Widget Container styling */
+        .widget-container {
+            min-height: 50px;
+            display: flex;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>🚀 Bot Deployer</h2>
-        <p>Login to manage your bots</p>
-        
-        <script async src="https://telegram.org/js/telegram-widget.js?22" 
-                data-telegram-login="SudeepDeployBot" 
-                data-size="large" 
-                data-radius="10" 
-                data-onauth="onTelegramAuth(user)" 
-                data-request-access="write"></script>
+
+    <div class="login-card">
+        <div class="glow-circle"></div>
+        <div class="status-badge">● SYSTEM ONLINE</div>
+        <h1>Deployer Console</h1>
+        <p>Login with Telegram to manage bots</p>
+
+        <div class="widget-container">
+            <script async src="https://telegram.org/js/telegram-widget.js?22" 
+                    data-telegram-login="BODDDLOQABOT" 
+                    data-size="large" 
+                    data-radius="12" 
+                    data-onauth="onTelegramAuth(user)" 
+                    data-request-access="write"></script>
+        </div>
     </div>
 
     <script>
         async function onTelegramAuth(user) {
+            // Loading Animation
+            document.querySelector('.login-card').innerHTML = '<h3 style="color:#fff">Verifying...</h3><p>Checking access permissions</p>';
+            
             const res = await fetch('/auth/telegram', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(user)
             });
             const data = await res.json();
+            
             if (data.status === 'success') {
                 window.location.href = '/dashboard';
             } else {
                 alert(data.message);
                 if(data.redirect) window.location.href = data.redirect;
+                else location.reload();
             }
         }
     </script>
 </body>
 </html>
+
