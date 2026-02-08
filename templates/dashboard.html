@@ -4,93 +4,82 @@
     <meta charset="UTF-8">
     <title>Dashboard</title>
     <style>
-        /* ... (Purana CSS Same rahega) ... */
-        body { background: #000; color: #eee; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        body { background: #050505; color: #fff; font-family: sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 250px; background: #0a0a0a; border-right: 1px solid #222; height: 100vh; padding: 20px; }
+        .content { flex: 1; padding: 30px; }
         
-        /* SERVICE CARD STYLE */
-        .card { background: #111; border: 1px solid #333; padding: 0; border-radius: 12px; overflow: hidden; position: relative; transition: 0.2s; }
-        .card:hover { border-color: #00ff00; transform: translateY(-5px); }
-        .card-img { width: 100%; height: 140px; object-fit: cover; }
+        .card { background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; margin-bottom: 20px; width: 300px; display: inline-block; margin-right: 20px; vertical-align: top; }
+        .card img { width: 100%; height: 150px; object-fit: cover; }
         .card-body { padding: 15px; }
         
-        .btn-start { display: block; width: 100%; background: #00ff00; color: #000; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 10px; text-align: center; cursor: pointer; border: none;}
-        .btn-help { background: transparent; color: #888; border: 1px solid #444; margin-top: 5px; color: #fff; }
-        .btn-help:hover { background: #222; }
-
-        /* MODAL (POPUP) STYLE */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; backdrop-filter: blur(5px); justify-content: center; align-items: center; }
-        .modal-content { background: #161b22; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; border-radius: 10px; border: 1px solid #30363d; padding: 20px; position: relative; }
-        .close-modal { position: absolute; top: 10px; right: 15px; font-size: 24px; cursor: pointer; color: #fff; }
+        .btn { display: block; width: 100%; padding: 10px; margin-top: 10px; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; }
+        .btn-green { background: #238636; color: white; }
+        .btn-help { background: transparent; border: 1px solid #555; color: #aaa; }
         
-        .step-item { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 20px; }
-        .step-item img { width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #333; }
-        .step-num { color: #00ff00; font-weight: bold; font-size: 14px; }
+        /* POPUP */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: #161b22; padding: 20px; border-radius: 10px; width: 400px; max-height: 80vh; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-    <div class="content" style="flex: 1; padding: 40px; overflow-y: auto;">
-        
-        <div id="services">
-            <h2>Select a Service</h2>
-            <div class="grid">
-                
-                {% for service in services %}
-                <div class="card">
-                    <img src="{{ service.thumbnail }}" class="card-img">
-                    
-                    <div class="card-body">
-                        <h3 style="margin: 0; color: #fff;">{{ service.name }}</h3>
-                        <p style="font-size: 13px; color: #888; margin: 5px 0 15px 0;">{{ service.description }}</p>
-                        
-                        <a href="/prepare/music" class="btn-start">⚡ Get Started</a>
-                        
-                        <button onclick='openHelp({{ service.tutorial | tojson }})' class="btn-start btn-help">❓ Need Help?</button>
-                    </div>
-                </div>
-                {% endfor %}
-
-            </div>
-        </div>
+    <div class="sidebar">
+        <h3>👋 {{ user.name }}</h3>
+        <p>@{{ user.username }}</p>
+        <hr style="border-color: #333;">
+        <p>🚀 Dashboard</p>
+        <p>📦 My Bots</p>
+        <a href="/logout" style="color: red;">Logout</a>
     </div>
 
-    <div id="helpModal" class="modal-overlay">
+    <div class="content">
+        <h1>Available Services</h1>
+        
+        {% for service in services %}
+        <div class="card">
+            <img src="{{ service.thumbnail }}">
+            <div class="card-body">
+                <h3>{{ service.name }}</h3>
+                <p style="color: #888; font-size: 13px;">{{ service.desc }}</p>
+                
+                <a href="/prepare" class="btn btn-green" style="text-decoration: none; text-align: center;">⚡ Get Started</a>
+                
+                <button onclick='openHelp({{ service.tutorial | tojson }})' class="btn btn-help">❓ Need Help</button>
+            </div>
+        </div>
+        {% endfor %}
+
+        <h1>📦 My Active Bots</h1>
+        {% for bot in my_bots %}
+            <div style="background: #111; padding: 10px; border: 1px solid #333; margin-bottom: 5px; display: flex; justify-content: space-between;">
+                <span>{{ bot.name }}</span>
+                <a href="{{ bot.app_url }}" target="_blank" style="color: #58a6ff;">Open Bot</a>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="helpModal" class="modal">
         <div class="modal-content">
-            <span onclick="closeHelp()" class="close-modal">&times;</span>
-            <h2 style="margin-top: 0; color: #00ff00;">📝 Setup Guide</h2>
-            <div id="stepsArea">
-                </div>
+            <h2 style="color: #238636;">📝 Setup Steps</h2>
+            <div id="stepsContainer"></div>
+            <button onclick="document.getElementById('helpModal').style.display='none'" class="btn btn-help">Close</button>
         </div>
     </div>
 
     <script>
-        function openHelp(tutorialData) {
-            const container = document.getElementById('stepsArea');
-            container.innerHTML = ""; // Clear old data
-
-            if (!tutorialData || tutorialData.length === 0) {
-                container.innerHTML = "<p>No tutorial available yet.</p>";
+        function openHelp(steps) {
+            const container = document.getElementById('stepsContainer');
+            container.innerHTML = "";
+            if(!steps || steps.length === 0) {
+                container.innerHTML = "<p>No tutorial added.</p>";
             } else {
-                tutorialData.forEach((step, index) => {
-                    const stepHTML = `
-                        <div class="step-item">
-                            <div class="step-num">STEP ${index + 1}</div>
-                            <p>${step.text}</p>
-                            ${step.img ? `<img src="${step.img}">` : ''}
-                        </div>
-                    `;
-                    container.innerHTML += stepHTML;
+                steps.forEach((step, i) => {
+                    container.innerHTML += `<p><b>Step ${i+1}:</b> ${step.text}</p>`;
+                    if(step.img) container.innerHTML += `<img src="${step.img}" style="width:100%; border-radius:5px; margin-bottom:15px;">`;
                 });
             }
-            
             document.getElementById('helpModal').style.display = 'flex';
         }
-
-        function closeHelp() {
-            document.getElementById('helpModal').style.display = 'none';
-        }
     </script>
-
 </body>
 </html>
